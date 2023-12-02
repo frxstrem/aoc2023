@@ -1,4 +1,4 @@
-use std::{collections::HashMap, str::FromStr};
+use std::str::FromStr;
 
 use aoc_runner_derive::{aoc, aoc_generator};
 
@@ -7,27 +7,50 @@ struct Game {
     subsets: Vec<ColorSet>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Copy, Clone, Debug, Default)]
 struct ColorSet {
-    colors: HashMap<Color, u32>,
+    red: u32,
+    green: u32,
+    blue: u32,
 }
 
 impl ColorSet {
     fn get(&self, color: Color) -> u32 {
-        self.colors.get(&color).copied().unwrap_or(0)
+        match color {
+            Red => self.red,
+            Green => self.green,
+            Blue => self.blue,
+        }
+    }
+
+    fn set(&mut self, color: Color, count: u32) {
+        match color {
+            Red => self.red = count,
+            Green => self.green = count,
+            Blue => self.blue = count,
+        }
     }
 
     fn max(&self, other: &Self) -> Self {
-        let colors = [Red, Green, Blue]
-            .into_iter()
-            .map(|color| (color, self.get(color).max(other.get(color))))
-            .filter(|(_, n)| *n > 0)
-            .collect();
-        Self { colors }
+        Self {
+            red: self.red.max(other.red),
+            green: self.green.max(other.green),
+            blue: self.blue.max(other.blue),
+        }
     }
 
     fn power(&self) -> u32 {
-        self.get(Red) * self.get(Green) * self.get(Blue)
+        self.red * self.green * self.blue
+    }
+}
+
+impl FromIterator<(Color, u32)> for ColorSet {
+    fn from_iter<I: IntoIterator<Item = (Color, u32)>>(iter: I) -> Self {
+        let mut colors = Self::default();
+        for (color, count) in iter {
+            colors.set(color, count);
+        }
+        colors
     }
 }
 
@@ -64,7 +87,7 @@ fn parse_input(input: &str) -> Vec<Game> {
             let subsets = subsets
                 .split(';')
                 .map(|subset| {
-                    let colors = subset
+                    subset
                         .trim()
                         .split(',')
                         .map(|color| {
@@ -74,8 +97,7 @@ fn parse_input(input: &str) -> Vec<Game> {
                             let color = color.parse().unwrap();
                             (color, count)
                         })
-                        .collect();
-                    ColorSet { colors }
+                        .collect()
                 })
                 .collect();
 
@@ -104,7 +126,7 @@ fn part2(input: &[Game]) -> u32 {
         .map(|game| {
             game.subsets
                 .iter()
-                .cloned()
+                .copied()
                 .reduce(|l, r| l.max(&r))
                 .unwrap_or_default()
         })
