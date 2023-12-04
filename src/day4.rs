@@ -39,22 +39,16 @@ fn part1(input: &[Card]) -> usize {
 
 #[aoc(day4, part2)]
 fn part2(input: &[Card]) -> usize {
-    let mut sum = 0;
-    let mut copies = VecDeque::new();
+    input
+        .iter()
+        .scan(VecDeque::new(), |copies, card| {
+            let n = 1 + copies.pop_front().unwrap_or(0);
+            let c = card.winning.intersection(&card.ticket).count();
 
-    for card in input {
-        let n = 1 + copies.pop_front().unwrap_or(0);
-        let c = card.winning.intersection(&card.ticket).count();
-        sum += n;
+            copies.resize(copies.len().max(c), 0);
+            copies.range_mut(0..c).for_each(|m| *m += n);
 
-        for i in 0..c {
-            if i < copies.len() {
-                copies[i] += n;
-            } else {
-                copies.push_back(n);
-            }
-        }
-    }
-
-    sum
+            Some(n)
+        })
+        .sum()
 }
