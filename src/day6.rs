@@ -2,6 +2,8 @@ use std::fmt::Write as _;
 
 use aoc_runner_derive::{aoc, aoc_generator};
 
+use crate::utils::binary_search::binary_search_range;
+
 #[derive(Copy, Clone, Debug, Default)]
 struct Race {
     time: u64,
@@ -63,15 +65,16 @@ fn part2(input: &[Race]) -> u64 {
 
 impl Race {
     fn count_ways_to_win(&self) -> u64 {
+        // p(t) is the distance traveled during the race if the button is held
+        // down for t seconds
         let p = |t| (self.time - t) * t;
 
-        let mut range = 1..self.time;
+        // Observation: p(t) is symmetric about t = self.time / 2
+        // We can binary search for the time at which p(t) is positive.
+        let i = binary_search_range(1, (self.time + 1) / 2, |&t| p(t).cmp(&self.dist))
+            .unwrap_or_else(|i| i)
+            + 1;
 
-        let first = range
-            .find(|t| p(*t) > self.dist)
-            .unwrap_or_else(|| panic!("race has no possible time to beat record (race={self:?})"));
-        let last = range.rfind(|t| p(*t) > self.dist).unwrap_or(first);
-
-        last - first + 1
+        self.time - 2 * i + 1
     }
 }
