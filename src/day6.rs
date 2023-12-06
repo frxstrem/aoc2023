@@ -117,7 +117,7 @@ impl Race {
 
         // Take advantage of the fact that p(t) is symmetric about t = self.time / 2,
         // we can binary search for the time at which p(t) is positive.
-        let i = binary_search_range(1, (self.time + 1) / 2, |&t| p(t).cmp(&self.dist))
+        let i = binary_search_range(0, (self.time + 1) / 2, |&t| p(t).cmp(&self.dist))
             .unwrap_or_else(|i| i)
             + 1;
 
