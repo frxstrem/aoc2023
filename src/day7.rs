@@ -1,4 +1,4 @@
-use std::{fmt::Debug, str::FromStr};
+use std::str::FromStr;
 
 use aoc_runner_derive::{aoc, aoc_generator};
 use itertools::Itertools;
@@ -58,28 +58,9 @@ impl Card {
             _ => panic!("invalid card rank: {ch:?}"),
         }
     }
-
-    fn as_char(&self) -> char {
-        match self.0 {
-            0 => '*',
-            2..=9 => std::char::from_digit(self.0 as u32, 10).unwrap(),
-            10 => 'T',
-            11 => 'J',
-            12 => 'Q',
-            13 => 'K',
-            14 => 'A',
-            _ => panic!("invalid card rank: {:?}", self.0),
-        }
-    }
 }
 
-impl Debug for Card {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.as_char())
-    }
-}
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
 enum Rank {
     HighCard,
     OnePair,
@@ -156,14 +137,5 @@ impl FromStr for Hand {
         } else {
             Err("Too many cards")
         }
-    }
-}
-
-impl Debug for Hand {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for card in &self.cards {
-            write!(f, "{}", card.as_char())?;
-        }
-        Ok(())
     }
 }
