@@ -1,6 +1,14 @@
-use std::{collections::HashMap, str::FromStr};
+use std::{
+    collections::HashMap,
+    fmt::{self, Debug},
+    str::FromStr,
+};
 
 use aoc_runner_derive::{aoc, aoc_generator};
+
+use crate::utils::num::lcm;
+
+use self::Dir::{L, R};
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 enum Dir {
@@ -8,14 +16,28 @@ enum Dir {
     L,
 }
 
-use Dir::{L, R};
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash)]
 struct Node([u8; 3]);
 
 impl Node {
     const START: Self = Self(*b"AAA");
     const END: Self = Self(*b"ZZZ");
+}
+
+impl Node {
+    fn is_start(self) -> bool {
+        self.0[2] == b'A'
+    }
+
+    fn is_end(self) -> bool {
+        self.0[2] == b'Z'
+    }
+}
+
+impl Debug for Node {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0.escape_ascii())
+    }
 }
 
 impl FromStr for Node {
@@ -82,18 +104,62 @@ fn part1(map: &Map) -> usize {
     let mut count = 0;
 
     while current != Node::END {
-        current = traverse(current, &map.node_map, &map.instrs);
+        current = traverse(current, map);
         count += map.instrs.len();
     }
 
     count
 }
 
-fn traverse(start: Node, map: &HashMap<Node, (Node, Node)>, instrs: &[Dir]) -> Node {
+#[aoc(day8, part2)]
+fn part2(map: &Map) -> usize {
+    let start_nodes = map
+        .node_map
+        .keys()
+        .copied()
+        .filter(|node| node.is_start())
+        .collect::<Vec<_>>();
+
+    start_nodes
+        .iter()
+        .map(|&start| {
+            // for each start node, compute distance to reach an end node
+            let mut node = start;
+            let mut n = 0;
+            while !node.is_end() {
+                node = traverse(node, map);
+                n += 1;
+            }
+            (node, n)
+        })
+        .map(|(end, n)| {
+            // for each end node, compute distance to reach another end node
+            let mut node = traverse(end, map);
+            let mut m = 1;
+            while !node.is_end() {
+                node = traverse(node, map);
+                m += 1;
+            }
+
+            // input check: end nodes are in a loop with no other end nodes
+            assert_eq!(end, node);
+            // input check: end node loop lengths are equal to each starting
+            // node's distance to the end node loop
+            assert_eq!(n, m);
+
+            (end, n)
+        })
+        .map(|(_, n)| n as usize)
+        .reduce(lcm)
+        .unwrap_or(1)
+        * map.instrs.len()
+}
+
+fn traverse(start: Node, map: &Map) -> Node {
     let mut current = start;
 
-    for instr in instrs {
-        let (left, right) = map.get(&current).copied().unwrap();
+    for instr in &map.instrs {
+        let (left, right) = map.node_map.get(&current).copied().unwrap();
 
         current = match instr {
             R => right,
