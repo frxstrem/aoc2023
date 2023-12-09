@@ -1,35 +1,37 @@
 use aoc_runner_derive::aoc;
 
-fn parse_input(s: &str) -> Vec<Vec<i32>> {
-    s.lines()
-        .map(|line| {
-            line.split_whitespace()
-                .map(|n| n.parse().unwrap())
-                .collect()
-        })
-        .collect()
+fn parse_input_into(line: &str, row: &mut Vec<i32>) {
+    row.clear();
+    row.extend(line.split_whitespace().map(|n| n.parse::<i32>().unwrap()));
 }
 
 #[aoc(day9, part1)]
 fn part1(s: &str) -> i32 {
-    let mut input = parse_input(s);
-    input.iter_mut().map(|row| extrapolate(row)).sum()
+    s.lines()
+        .scan(Vec::with_capacity(1000), |row, line| {
+            parse_input_into(line, row);
+            Some(extrapolate(row))
+        })
+        .sum()
 }
 
 #[aoc(day9, part2)]
 fn part2(s: &str) -> i32 {
-    let mut input = parse_input(s);
-    input.iter_mut().map(|row| extrapolate_back(row)).sum()
+    s.lines()
+        .scan(Vec::with_capacity(1000), |row, line| {
+            parse_input_into(line, row);
+            Some(extrapolate_back(row))
+        })
+        .sum()
 }
 
 #[aoc(day9, part2, reverse)]
 fn part2_reverse(s: &str) -> i32 {
-    let mut input = parse_input(s);
-    input
-        .iter_mut()
-        .map(|row| {
+    s.lines()
+        .scan(Vec::with_capacity(1000), |row, line| {
+            parse_input_into(line, row);
             row.reverse();
-            extrapolate(row)
+            Some(extrapolate(row))
         })
         .sum()
 }
