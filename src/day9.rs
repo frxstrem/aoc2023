@@ -1,6 +1,5 @@
-use aoc_runner_derive::{aoc, aoc_generator};
+use aoc_runner_derive::aoc;
 
-#[aoc_generator(day9)]
 fn parse_input(s: &str) -> Vec<Vec<i32>> {
     s.lines()
         .map(|line| {
@@ -12,15 +11,22 @@ fn parse_input(s: &str) -> Vec<Vec<i32>> {
 }
 
 #[aoc(day9, part1)]
-fn part1(s: &[Vec<i32>]) -> i32 {
-    let mut s = s.to_vec();
-    s.iter_mut().map(|row| extrapolate(row)).sum()
+fn part1(s: &str) -> i32 {
+    let mut input = parse_input(s);
+    input.iter_mut().map(|row| extrapolate(row)).sum()
 }
 
 #[aoc(day9, part2)]
-fn part2(s: &[Vec<i32>]) -> i32 {
-    let mut s = s.to_vec();
-    s.iter_mut()
+fn part2(s: &str) -> i32 {
+    let mut input = parse_input(s);
+    input.iter_mut().map(|row| extrapolate_back(row)).sum()
+}
+
+#[aoc(day9, part2, reverse)]
+fn part2_reverse(s: &str) -> i32 {
+    let mut input = parse_input(s);
+    input
+        .iter_mut()
         .map(|row| {
             row.reverse();
             extrapolate(row)
@@ -29,25 +35,35 @@ fn part2(s: &[Vec<i32>]) -> i32 {
 }
 
 fn extrapolate(row: &mut [i32]) -> i32 {
-    let mut row = row.to_vec();
-    let mut i = 0;
-    let mut n = loop {
-        assert!(i < row.len());
-
+    for i in 0..row.len() {
         if is_constant(&row[i..]) {
-            break row[i];
+            return row[0..=i].iter().sum();
         }
 
-        diff(&mut row[i..]);
-        i += 1;
-    };
-    while i > 0 {
-        i -= 1;
-        cuml(&mut row[i..]);
-        n += row.last().unwrap();
+        let last = *row.last().unwrap();
+        for j in (i + 1..row.len()).rev() {
+            row[j] -= row[j - 1];
+        }
+        row[i] = last;
     }
+    unreachable!()
+}
 
-    n
+fn extrapolate_back(row: &mut [i32]) -> i32 {
+    for i in 0..row.len() {
+        if is_constant(&row[i..]) {
+            return row[0..=i]
+                .iter()
+                .enumerate()
+                .map(|(i, n)| if i % 2 == 0 { *n } else { -*n })
+                .sum();
+        }
+
+        for j in (i + 1..row.len()).rev() {
+            row[j] -= row[j - 1];
+        }
+    }
+    unreachable!()
 }
 
 fn is_constant(row: &[i32]) -> bool {
@@ -57,23 +73,4 @@ fn is_constant(row: &[i32]) -> bool {
 
     let first = row[0];
     row[1..].iter().all(|&n| n == first)
-}
-
-/// Turn a row of integers into a row of differences.
-///
-/// The first element stays the same, whereas for every other element
-/// `a[i] = a[i] - a[i-1]`.
-fn diff(row: &mut [i32]) {
-    for i in (1..row.len()).rev() {
-        row[i] -= row[i - 1];
-    }
-}
-
-/// Turn a row of integers into a row of cumulative sums.
-///
-/// This is the inverse of `diff`.
-fn cuml(row: &mut [i32]) {
-    for i in 1..row.len() {
-        row[i] += row[i - 1];
-    }
 }
