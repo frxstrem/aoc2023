@@ -2,11 +2,6 @@ use std::collections::{BTreeSet, VecDeque};
 
 use aoc_runner_derive::{aoc, aoc_generator};
 
-struct Card {
-    winning: BTreeSet<u32>,
-    ticket: BTreeSet<u32>,
-}
-
 #[aoc_generator(day4)]
 fn parse_input(input: &str) -> Vec<Card> {
     input
@@ -51,4 +46,9 @@ fn part2(input: &[Card]) -> usize {
             Some(n)
         })
         .sum()
+}
+
+struct Card {
+    winning: BTreeSet<u32>,
+    ticket: BTreeSet<u32>,
 }

@@ -10,53 +10,6 @@ use crate::utils::num::lcm;
 
 use self::Dir::{L, R};
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-enum Dir {
-    R,
-    L,
-}
-
-#[derive(Copy, Clone, Eq, PartialEq, Hash)]
-struct Node([u8; 3]);
-
-impl Node {
-    const START: Self = Self(*b"AAA");
-    const END: Self = Self(*b"ZZZ");
-}
-
-impl Node {
-    fn is_start(self) -> bool {
-        self.0[2] == b'A'
-    }
-
-    fn is_end(self) -> bool {
-        self.0[2] == b'Z'
-    }
-}
-
-impl Debug for Node {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0.escape_ascii())
-    }
-}
-
-impl FromStr for Node {
-    type Err = &'static str;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        s.as_bytes()
-            .try_into()
-            .map(Self)
-            .map_err(|_| "invalid node")
-    }
-}
-
-#[derive(Clone, Debug)]
-struct Map {
-    instrs: Vec<Dir>,
-    node_map: HashMap<Node, (Node, Node)>,
-}
-
 #[aoc_generator(day8)]
 fn parse_input(s: &str) -> Map {
     let mut lines = s.lines();
@@ -168,4 +121,51 @@ fn traverse(start: Node, map: &Map) -> Node {
     }
 
     current
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+enum Dir {
+    R,
+    L,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash)]
+struct Node([u8; 3]);
+
+impl Node {
+    const START: Self = Self(*b"AAA");
+    const END: Self = Self(*b"ZZZ");
+}
+
+impl Node {
+    fn is_start(self) -> bool {
+        self.0[2] == b'A'
+    }
+
+    fn is_end(self) -> bool {
+        self.0[2] == b'Z'
+    }
+}
+
+impl Debug for Node {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0.escape_ascii())
+    }
+}
+
+impl FromStr for Node {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        s.as_bytes()
+            .try_into()
+            .map(Self)
+            .map_err(|_| "invalid node")
+    }
+}
+
+#[derive(Clone, Debug)]
+struct Map {
+    instrs: Vec<Dir>,
+    node_map: HashMap<Node, (Node, Node)>,
 }

@@ -4,12 +4,6 @@ use aoc_runner_derive::{aoc, aoc_generator};
 
 use crate::utils::binary_search::binary_search_range;
 
-#[derive(Copy, Clone, Debug, Default)]
-struct Race {
-    time: u64,
-    dist: u64,
-}
-
 #[aoc_generator(day6)]
 fn parse_input(input: &str) -> Vec<Race> {
     let mut lines = input.lines();
@@ -90,6 +84,12 @@ fn parse_concat_race(races: &[Race]) -> Race {
         time: time.parse().unwrap(),
         dist: dist.parse().unwrap(),
     }
+}
+
+#[derive(Copy, Clone, Debug, Default)]
+struct Race {
+    time: u64,
+    dist: u64,
 }
 
 impl Race {

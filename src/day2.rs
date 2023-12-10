@@ -1,17 +1,5 @@
 use aoc_runner_derive::{aoc, aoc_generator};
 
-struct Game {
-    id: u32,
-    subsets: Vec<Colors>,
-}
-
-#[derive(Copy, Clone, Default)]
-struct Colors {
-    red: u32,
-    green: u32,
-    blue: u32,
-}
-
 #[aoc_generator(day2)]
 fn parse_input(input: &str) -> Vec<Game> {
     input
@@ -73,4 +61,16 @@ fn part2(input: &[Game]) -> u32 {
         })
         .map(|colors| colors.red * colors.green * colors.blue)
         .sum()
+}
+
+struct Game {
+    id: u32,
+    subsets: Vec<Colors>,
+}
+
+#[derive(Copy, Clone, Default)]
+struct Colors {
+    red: u32,
+    green: u32,
+    blue: u32,
 }
